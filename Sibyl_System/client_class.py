@@ -46,10 +46,7 @@ class SibylClient(TelegramClient):
         message=False,
     ) -> bool:
         """Gbans & Fbans user."""
-        if self.gban_logs:
-            logs = self.gban_logs
-        else:
-            logs = self.log
+        logs = self.gban_logs or self.log
         if not auto:
             await self.send_message(
                 logs,
@@ -91,10 +88,7 @@ class SibylClient(TelegramClient):
         )
 
     async def ungban(self, target: int = None, reason: str = None) -> bool:
-        if self.gban_logs:
-            logs = self.gban_logs
-        else:
-            logs = self.log
+        logs = self.gban_logs or self.log
         if not (await delete_gban(target)):
             return False
         await self.send_message(

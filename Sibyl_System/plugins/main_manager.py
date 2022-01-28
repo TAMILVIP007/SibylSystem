@@ -87,10 +87,7 @@ async def scan(event):
         target = replied.sender.id
     executer = await event.get_sender()
     req_proof = req_user = False
-    if "f" in flags.keys() and executer.id in INSPECTORS:
-        approve = True
-    else:
-        approve = False
+    approve = "f" in flags.keys() and executer.id in INSPECTORS
     if replied.media:
         await replied.forward_to(Sibyl_logs)
     executor = f"[{executer.first_name}](tg://user?id={executer.id})"
@@ -155,33 +152,32 @@ async def approve(event):
     match = re.match(r"\$SCAN", replied.text)
     auto_match = re.search(r"\$AUTO(SCAN)?", replied.text)
     me = await System.get_me()
-    if auto_match:
-        if replied.sender.id == me.id:
-            id = re.search(
-                r"\*\*Scanned user:\*\* (\[\w+\]\(tg://user\?id=(\d+)\)|(\d+))",
-                replied.text,
-            ).group(2)
-            try:
-                message = re.search(
-                    "(\*\*)?Message:(\*\*)? (.*)", replied.text, re.DOTALL
-                ).group(3)
-            except:
-                message = None
-            try:
-                bot = (await System.get_entity(id)).bot
-            except:
-                bot = False
-            reason = re.search("\*\*Reason:\*\* (.*)", replied.text).group(1)
-            await System.gban(
-                enforcer=me.id,
-                target=id,
-                reason=reason,
-                msg_id=replied.id,
-                auto=True,
-                bot=bot,
-                message=message,
-            )
-            return "OwO"
+    if auto_match and replied.sender.id == me.id:
+        id = re.search(
+            r"\*\*Scanned user:\*\* (\[\w+\]\(tg://user\?id=(\d+)\)|(\d+))",
+            replied.text,
+        ).group(2)
+        try:
+            message = re.search(
+                "(\*\*)?Message:(\*\*)? (.*)", replied.text, re.DOTALL
+            ).group(3)
+        except:
+            message = None
+        try:
+            bot = (await System.get_entity(id)).bot
+        except:
+            bot = False
+        reason = re.search("\*\*Reason:\*\* (.*)", replied.text).group(1)
+        await System.gban(
+            enforcer=me.id,
+            target=id,
+            reason=reason,
+            msg_id=replied.id,
+            auto=True,
+            bot=bot,
+            message=message,
+        )
+        return "OwO"
     if match:
         reply = replied.sender.id
         sender = await event.get_sender()
@@ -202,13 +198,9 @@ async def approve(event):
                 reason = re.search(
                     r"(\*\*)?(Scan)? ?Reason:(\*\*)? (`([^`]*)`|.*)", replied.text
                 )
-                reason = reason.group(5) if reason.group(5) else reason.group(4)
-            if len(list) > 1:
-                id1 = list[0]
-                id2 = list[1]
-            else:
-                id1 = list[0]
-                id2 = re.findall(r"(\d+)", replied.text)[1]
+                reason = reason.group(5) or reason.group(4)
+            id1 = list[0]
+            id2 = list[1] if len(list) > 1 else re.findall(r"(\d+)", replied.text)[1]
             if id1 in ENFORCERS or SIBYL:
                 enforcer = id1
                 scam = id2
@@ -228,8 +220,7 @@ async def approve(event):
             await System.gban(
                 enforcer, scam, reason, replied.id, sender, bot=bot, message=message
             )
-            orig = re.search(r"t.me/(\w+)/(\d+)", replied.text)
-            if orig:
+            if orig := re.search(r"t.me/(\w+)/(\d+)", replied.text):
                 await System.send_message(
                     orig.group(1),
                     "User is a target for enforcement action.\nEnforcement Mode: Lethal Eliminator",
@@ -243,9 +234,7 @@ async def reject(event):
     replied = await event.get_reply_message()
     me = await System.get_me()
     if replied.from_id.user_id == me.id:
-        # print('Matching UwU')
-        match = re.match(r"\$(SCAN|AUTO(SCAN)?)", replied.text)
-        if match:
+        if match := re.match(r"\$(SCAN|AUTO(SCAN)?)", replied.text):
             # print('Matched OmU')
             id = replied.id
             await System.edit_message(Sibyl_logs, id, reject_string)

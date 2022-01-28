@@ -1,5 +1,6 @@
 """Gets ENV vars or Config vars then calls class."""
 
+
 from telethon import events
 from telethon.sessions import StringSession
 from motor import motor_asyncio
@@ -17,8 +18,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-ENV = bool(os.environ.get("ENV", False))
-if ENV:
+if ENV := bool(os.environ.get("ENV", False)):
     API_ID_KEY = int(os.environ.get("API_ID_KEY"))
     API_HASH_KEY = os.environ.get("API_HASH_KEY")
     STRING_SESSION = os.environ.get("STRING_SESSION")
@@ -26,9 +26,9 @@ if ENV:
     HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
     RAW_SIBYL = os.environ.get("SIBYL", "")
     RAW_ENFORCERS = os.environ.get("ENFORCERS", "")
-    CHARLIE = list(int(x) for x in os.environ.get("CHARLIE", "").split())
-    ADMIRALS = list(int(x) for x in os.environ.get("ADMIRALS", "").split())
-    CONQUERORS = list(int(x) for x in os.environ.get("CONQUERORS", "").split())
+    CHARLIE = [int(x) for x in os.environ.get("CHARLIE", "").split()]
+    ADMIRALS = [int(x) for x in os.environ.get("ADMIRALS", "").split()]
+    CONQUERORS = [int(x) for x in os.environ.get("CONQUERORS", "").split()]
     MONGO_DB_URL = os.environ.get("MONGO_DB_URL")
     Sibyl_logs = int(os.environ.get("Sibyl_logs"))
     Sibyl_approved_logs = int(os.environ.get("Sibyl_Approved_Logs"))
@@ -69,26 +69,27 @@ async def make_collections() -> str:
     if (
         await collection.count_documents({"_id": 1}, limit=1) == 0
     ):  # Blacklisted words list
-        dictw = {"_id": 1}
-        dictw["blacklisted"] = []
+        dictw = {'_id': 1, 'blacklisted': []}
         await collection.insert_one(dictw)
 
     if (
         await collection.count_documents({"_id": 2}, limit=1) == 0
     ):  # Blacklisted words in name list
-        dictw = {"_id": 2, "Type": "Wlc Blacklist"}
-        dictw["blacklisted_wlc"] = []
+        dictw = {'_id': 2, 'Type': 'Wlc Blacklist', 'blacklisted_wlc': []}
         await collection.insert_one(dictw)
     if await collection.count_documents({"_id": 3}, limit=1) == 0:  # Gbanned users list
-        dictw = {"_id": 3, "Type": "Gban:List"}
-        dictw["victim"] = []
-        dictw["gbanners"] = []
-        dictw["reason"] = []
-        dictw["proof_id"] = []
+        dictw = {
+            '_id': 3,
+            'Type': 'Gban:List',
+            'victim': [],
+            'gbanners': [],
+            'reason': [],
+            'proof_id': [],
+        }
+
         await collection.insert_one(dictw)
     if await collection.count_documents({"_id": 4}, limit=1) == 0:  # Rank tree list
-        sample_dict = {"_id": 4, "data": {}, "standalone": {}}
-        sample_dict["data"] = {}
+        sample_dict = {'_id': 4, 'standalone': {}, 'data': {}}
         for x in CHARLIE:
             sample_dict["data"][str(x)] = {}
             sample_dict["standalone"][str(x)] = {

@@ -7,11 +7,10 @@ async def whois(event):
     try:
         to_get = event.pattern_match.group(1)
     except Exception:
-        if event.reply:
-            replied = await event.get_reply_message()
-            to_get = int(replied.sender.id)
-        else:
+        if not event.reply:
             return
+        replied = await event.get_reply_message()
+        to_get = int(replied.sender.id)
     try:
         to_get = int(to_get)
     except Exception:

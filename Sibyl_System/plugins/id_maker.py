@@ -31,10 +31,7 @@ async def image_maker(event) -> None:
     )
     draw.text((393, 50), str(replied_user.from_id.user_id), fill=color, font=font)
     id_template.save("user_id.png")
-    if "doc" in event.text:
-        force_document = True
-    else:
-        force_document = False
+    force_document = "doc" in event.text
     await System.send_message(
         event.chat_id,
         "Generated User ID",

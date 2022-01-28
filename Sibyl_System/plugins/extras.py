@@ -61,7 +61,7 @@ async def addcon(event) -> None:
         await System.disconnect()
         os.execl(sys.executable, sys.executable, *sys.argv)
         quit()
-    if not event.from_id.user_id in CHARLIE:
+    if event.from_id.user_id not in CHARLIE:
         await add_conquerors(event.from_id.user_id, u_id)
     await System.send_message(
         event.chat_id, f"Added [{u_id}](tg://user?id={u_id}) to Enforcers"
@@ -127,10 +127,9 @@ async def join(event) -> None:
         link = event.text.split(" ", 1)[1]
     except BaseException:
         return
-    private = re.match(
+    if private := re.match(
         r"(https?://)?(www\.)?t(elegram)?\.(dog|me|org)/joinchat/(.*)", link
-    )
-    if private:
+    ):
         await System(ImportChatInviteRequest(private.group(5)))
         await System.send_message(event.chat_id, "Joined chat!")
         await System.send_message(
@@ -227,7 +226,7 @@ async def rmins(event) -> None:
 @System.on(system_cmd(pattern=r"info ", allow_admirals=True))
 async def info(event) -> None:
     data = (await get_data())["standalone"]
-    if not event.text.split(" ", 1)[1] in data.keys():
+    if event.text.split(" ", 1)[1] not in data.keys():
         return
     u = event.text.split(" ", 1)[1]
     msg = f"User: {u}\n"
@@ -254,10 +253,9 @@ async def resolve(event) -> None:
         link = event.text.split(" ", 1)[1]
     except BaseException:
         return
-    match = re.match(
+    if match := re.match(
         r"(https?://)?(www\.)?t(elegram)?\.(dog|me|org)/joinchat/(.*)", link
-    )
-    if match:
+    ):
         try:
             data = resolve_invite_link(match.group(5))
         except BaseException:
@@ -277,8 +275,7 @@ async def leave(event) -> None:
         link = event.text.split(" ", 1)[1]
     except BaseException:
         return
-    c_id = re.match(r"-(\d+)", link)
-    if c_id:
+    if c_id := re.match(r"-(\d+)", link):
         await System(LeaveChannelRequest(int(c_id.group(0))))
         await System.send_message(
             event.chat_id, f"Sibyl has left chat with id[-{c_id.group(1)}]"
